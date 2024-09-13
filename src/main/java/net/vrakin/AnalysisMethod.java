@@ -1,13 +1,21 @@
 package net.vrakin;
 
 
+import lombok.Getter;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+@Getter
+@Setter
 public class AnalysisMethod {
+
+    final static Logger logger = LoggerFactory.getLogger(AnalysisMethod.class);
     public static final int TRIAL_NUMBER = 10;
     private String nameMethod;
     private Map<Integer, Double> testTimes;
@@ -26,41 +34,24 @@ public class AnalysisMethod {
     }
 
     public void analysisMethod(){
+        logger.info("Test of {} starting", nameMethod);
+
         for (Map.Entry<Integer, Double> testTime : testTimes.entrySet()) {
             List<Double> times = new ArrayList<>();
             testTime.setValue(0D);
+
             for (int i = 0; i < TRIAL_NUMBER; i++) {
                 long m = System.currentTimeMillis();
                 resultTimes.put(testTime.getKey(), providerMethod.method(testTime.getKey()));
-                times.add((double) (System.currentTimeMillis() - m));
+                double currentTime = (double) (System.currentTimeMillis() - m);
+                times.add(currentTime);
+                logger.info("time{} for number {} - {}", i, testTime.getKey(), currentTime);
             }
             testTimes.put(testTime.getKey(), times.stream().reduce(testTime.getValue(), Double::sum) / TRIAL_NUMBER);
+            logger.info("Test: {}, Result: {}, time: {}", testTime.getKey(),
+                    resultTimes.get(testTime.getKey()), testTimes.get(testTime.getKey()));
         }
 
-    }
-
-    public String getNameMethod() {
-        return nameMethod;
-    }
-
-    public void setNameMethod(String nameMethod) {
-        this.nameMethod = nameMethod;
-    }
-
-    public ProviderMethod getProviderMethod() {
-        return providerMethod;
-    }
-
-    public void setProviderMethod(ProviderMethod providerMethod) {
-        this.providerMethod = providerMethod;
-    }
-
-    public Map<Integer, Double> getTestTimes() {
-        return testTimes;
-    }
-
-    public void setTestTimes(Map<Integer, Double> testTimes) {
-        this.testTimes = testTimes;
     }
 
     @Override
